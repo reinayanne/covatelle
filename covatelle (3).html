@@ -1,0 +1,1233 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F25D94">
+<title>CovaTelle 🎀 Pastry Boutique Suite</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --pink-50:#FFF5F9;--pink-100:#FFE4F0;--pink-200:#FFC9DE;--pink-300:#FFA8C9;--pink-400:#FF7FB0;--pink-500:#F25D94;--pink-600:#D63D7B;--pink-700:#B02A64;
+  --gold-50:#FDF8EA;--gold-100:#F9EFD3;--gold-300:#E8CF8F;--gold-500:#C9A227;--gold-600:#A9821F;--gold-700:#8A6A14;
+  --ink:#43283A;--muted:#A08293;--line:#FFDDE9;
+  --shadow:0 10px 34px rgba(242,93,148,.13);
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue","Segoe UI",Roboto,sans-serif;
+  background:
+    radial-gradient(900px 420px at 85% -8%, rgba(232,207,143,.35), transparent 60%),
+    radial-gradient(760px 480px at -12% 18%, rgba(255,168,201,.4), transparent 62%),
+    linear-gradient(165deg,#FFF8FB 0%,#FFF0F6 42%,#FDF6E8 100%);
+  color:var(--ink); min-height:100vh; padding-bottom:104px;
+}
+/* ---------- header ---------- */
+.hdr{position:sticky;top:0;z-index:80;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  background:rgba(255,248,251,.82);border-bottom:1px solid var(--line)}
+.hdr-in{max-width:1060px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:12px 16px}
+.logo-txt{line-height:1.05}
+.logo-txt b{font-size:19px;letter-spacing:.4px;background:linear-gradient(120deg,var(--pink-600),var(--pink-400) 55%,var(--gold-500));-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo-txt span{display:block;font-size:9.5px;letter-spacing:2.6px;text-transform:uppercase;color:var(--gold-600);font-weight:700}
+.sync-pill{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--muted);
+  background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 11px}
+.dot{width:8px;height:8px;border-radius:50%;background:#CBCBCB}
+.dot.on{background:#34C759;box-shadow:0 0 0 4px rgba(52,199,89,.18)}
+.dot.local{background:var(--gold-500);box-shadow:0 0 0 4px rgba(201,162,39,.18)}
+/* ---------- layout ---------- */
+.wrap{max-width:1060px;margin:0 auto;padding:18px 16px 30px}
+.view{display:none;animation:fadeUp .38s cubic-bezier(.2,.8,.3,1)}
+.view.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.card{background:rgba(255,255,255,.78);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:18px}
+.card + .card{margin-top:14px}
+.ctitle{font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.ctitle .em{font-size:17px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:720px){.grid2{grid-template-columns:1fr}}
+/* ---------- buttons / inputs ---------- */
+.btn{border:none;cursor:pointer;font:inherit;font-weight:700;border-radius:15px;padding:12px 18px;font-size:14px;
+  transition:transform .15s,box-shadow .2s;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.btn:active{transform:scale(.96)}
+.btn-pink{background:linear-gradient(135deg,var(--pink-400),var(--pink-500));color:#fff;box-shadow:0 8px 20px rgba(242,93,148,.35)}
+.btn-gold{background:linear-gradient(135deg,#EED694,var(--gold-500));color:#4a3a10;box-shadow:0 8px 20px rgba(201,162,39,.3)}
+.btn-ghost{background:#fff;border:1.5px solid var(--pink-200);color:var(--pink-600)}
+.btn-sm{padding:8px 13px;font-size:12.5px;border-radius:11px}
+.btn-danger{background:#fff1f3;color:#d33;border:1.5px solid #ffd2da}
+.inp,select.inp,textarea.inp{width:100%;padding:11px 13px;border-radius:13px;border:1.5px solid var(--pink-200);background:#fff;
+  font:inherit;font-size:14px;color:var(--ink);transition:border-color .2s,box-shadow .2s}
+.inp:focus{outline:none;border-color:var(--pink-400);box-shadow:0 0 0 4px rgba(255,127,176,.16)}
+label.lbl{display:block;font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin:10px 0 5px}
+.row-flex{display:flex;gap:10px;flex-wrap:wrap}
+.row-flex>*{flex:1;min-width:120px}
+/* ---------- dropzone ---------- */
+.drop{border:2.5px dashed var(--pink-300);border-radius:24px;background:linear-gradient(160deg,#fff,var(--pink-50));
+  padding:34px 18px;text-align:center;cursor:pointer;transition:.25s}
+.drop:hover,.drop.over{border-color:var(--pink-500);background:var(--pink-50);transform:scale(1.01)}
+.drop .big{font-size:44px}
+.drop p{font-size:13.5px;color:var(--muted);margin-top:6px}
+.prog{height:9px;border-radius:99px;background:var(--pink-100);overflow:hidden;margin-top:12px;display:none}
+.prog>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pink-400),var(--gold-500));border-radius:99px;transition:width .25s}
+/* ---------- table ---------- */
+.tbl-scroll{overflow:auto;border-radius:16px;border:1px solid var(--line);background:#fff}
+table.xt{width:100%;border-collapse:collapse;font-size:12.5px;min-width:640px}
+table.xt th{position:sticky;top:0;background:var(--pink-50);color:var(--pink-700);font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;
+  text-align:left;padding:10px 11px;border-bottom:1.5px solid var(--line);white-space:nowrap;z-index:2}
+table.xt td{padding:9px 11px;border-bottom:1px solid #FFF0F6;vertical-align:middle}
+table.xt tr:last-child td{border-bottom:none}
+table.xt tr:hover td{background:#FFF9FC}
+td .inp{padding:7px 9px;font-size:12.5px;border-radius:9px}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip{display:inline-block;background:var(--pink-100);color:var(--pink-700);font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.chip.gold{background:var(--gold-100);color:var(--gold-700)}
+.icobtn{border:none;background:transparent;cursor:pointer;font-size:15px;padding:4px 6px;border-radius:8px}
+.icobtn:hover{background:var(--pink-100)}
+tfoot td{font-weight:800;background:var(--gold-50);border-top:2px solid var(--gold-300)}
+/* ---------- stat cards ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.stat{background:linear-gradient(150deg,#fff,var(--pink-50));border:1px solid var(--line);border-radius:20px;padding:15px 16px;box-shadow:var(--shadow)}
+.stat b{font-size:21px;display:block;margin-top:3px;font-variant-numeric:tabular-nums}
+.stat span{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.stat.gold{background:linear-gradient(150deg,#fff,var(--gold-50));border-color:var(--gold-100)}
+/* ---------- bars ---------- */
+.bar-row{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:12.5px}
+.bar-row .nm{width:110px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;height:11px;background:var(--pink-100);border-radius:99px;overflow:hidden}
+.bar-track>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--pink-400),var(--pink-500));width:0;transition:width .8s cubic-bezier(.2,.8,.3,1)}
+.bar-row .amt{width:88px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+/* ---------- tab bar ---------- */
+.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:90;display:flex;justify-content:space-around;align-items:flex-end;
+  background:rgba(255,255,255,.9);backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);border-top:1px solid var(--line);
+  padding:8px 6px calc(10px + env(safe-area-inset-bottom))}
+.tab{flex:1;background:none;border:none;cursor:pointer;font:inherit;display:flex;flex-direction:column;align-items:center;gap:3px;
+  color:var(--muted);font-size:9.5px;font-weight:700;letter-spacing:.3px;padding:4px 0}
+.tab svg{width:22px;height:22px}
+.tab.active{color:var(--pink-600)}
+.tab.active svg{filter:drop-shadow(0 3px 6px rgba(242,93,148,.4))}
+.fab{width:58px;height:58px;border-radius:50%;border:3px solid #fff;margin-top:-32px;cursor:pointer;
+  background:linear-gradient(135deg,var(--pink-400),var(--pink-600));box-shadow:0 10px 26px rgba(242,93,148,.5);
+  display:flex;align-items:center;justify-content:center;transition:transform .15s}
+.fab:active{transform:scale(.92)}
+.fab svg{width:26px;height:26px}
+/* ---------- modal ---------- */
+.modal{position:fixed;inset:0;z-index:200;display:none;align-items:flex-end;justify-content:center;background:rgba(67,40,58,.45);backdrop-filter:blur(6px)}
+.modal.open{display:flex}
+.sheet{background:#fff;width:100%;max-width:760px;max-height:92vh;overflow-y:auto;border-radius:26px 26px 0 0;padding:20px 18px 30px;
+  animation:slideUp .34s cubic-bezier(.2,.8,.3,1)}
+@media(min-width:760px){.modal{align-items:center}.sheet{border-radius:26px;max-height:86vh}}
+@keyframes slideUp{from{transform:translateY(60px);opacity:.4}to{transform:none;opacity:1}}
+.grab{width:44px;height:5px;border-radius:99px;background:var(--pink-200);margin:0 auto 14px}
+/* ---------- misc ---------- */
+.toast{position:fixed;left:50%;bottom:112px;transform:translateX(-50%) translateY(20px);opacity:0;z-index:300;pointer-events:none;
+  background:rgba(67,40,58,.94);color:#fff;font-size:13px;font-weight:600;padding:11px 18px;border-radius:999px;transition:.3s;max-width:88vw;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.empty{text-align:center;padding:26px 14px;color:var(--muted);font-size:13px}
+.empty .bowwrap{margin:0 auto 8px;width:110px;opacity:.9}
+details.raw{margin-top:12px;font-size:12px}
+details.raw summary{cursor:pointer;color:var(--muted);font-weight:700;font-size:11.5px;letter-spacing:.6px;text-transform:uppercase}
+details.raw pre{white-space:pre-wrap;background:var(--pink-50);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:8px;max-height:220px;overflow:auto;font-size:11px}
+.ribbon-deco{position:absolute;right:-14px;top:-14px;width:96px;opacity:.9;pointer-events:none;transform:rotate(14deg)}
+.rel{position:relative;overflow:hidden}
+.hint{font-size:11.5px;color:var(--muted);line-height:1.55}
+.gold-txt{color:var(--gold-600)}
+.pink-txt{color:var(--pink-600)}
+.costbox{background:linear-gradient(150deg,var(--pink-50),var(--gold-50));border:1.5px solid var(--gold-100);border-radius:18px;padding:14px 16px}
+.costbox .big2{font-size:26px;font-weight:800;color:var(--pink-600)}
+.sep{height:1px;background:var(--line);margin:14px 0}
+.recipe-card{border:1px solid var(--line);border-radius:18px;padding:14px;background:#fff}
+.recipe-card + .recipe-card{margin-top:10px}
+.pill-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.pill{border:1.5px solid var(--pink-200);background:#fff;color:var(--pink-600);border-radius:999px;padding:7px 14px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.pill.on{background:linear-gradient(135deg,var(--pink-400),var(--pink-500));color:#fff;border-color:transparent}
+/* ---------- photo / crop ---------- */
+.ph{width:44px;height:44px;border-radius:10px;object-fit:cover;border:1px solid var(--line);display:block;cursor:pointer}
+.ph-btn{border:1.5px dashed var(--pink-300);background:var(--pink-50);color:var(--pink-600);border-radius:10px;width:44px;height:44px;font-size:17px;cursor:pointer;flex:none}
+td .dt{padding:5px 6px;font-size:10.5px;border-radius:8px}
+.bc{max-width:120px}
+/* ---------- scan batches ---------- */
+.batch-head td{background:var(--gold-50)!important;font-weight:800}
+.batch-head .inp{background:#fff}
+/* ---------- calendar ---------- */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal .dow{font-size:9.5px;font-weight:800;text-align:center;color:var(--muted);letter-spacing:.8px;padding:4px 0}
+.cal .day{min-height:66px;border:1.5px solid var(--line);border-radius:12px;background:#fff;padding:5px 6px;cursor:pointer;font-size:12px;transition:.15s;overflow:hidden}
+.cal .day:hover{border-color:var(--pink-400)}
+.cal .day.sel{border-color:var(--pink-500);box-shadow:0 0 0 3px rgba(242,93,148,.15)}
+.cal .day.today{background:linear-gradient(150deg,#fff,var(--pink-50));border-color:var(--pink-400)}
+.cal .day.dim{opacity:.35;cursor:default}
+.cal .num{font-weight:800;font-size:12px}
+.cal .dots{margin-top:4px;display:flex;flex-direction:column;gap:2px}
+.cal .od{font-size:9.5px;background:var(--pink-100);color:var(--pink-700);border-radius:6px;padding:1px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal .od.done{background:#E8F8EE;color:#1B7A43}
+.cal .od.cancel{background:#F3F3F3;color:#999;text-decoration:line-through}
+/* ---------- orders / expiry ---------- */
+.status-sel{padding:5px 8px;font-size:11px;border-radius:9px;border:1.5px solid var(--line);font-weight:700;background:#fff;font:inherit}
+.exp-warn{color:#B45309;font-weight:700}
+.exp-bad{color:#DC2626;font-weight:700}
+.crop-wrap{background:#222;border-radius:14px;overflow:hidden;text-align:center}
+#cropCanvas{max-width:100%;touch-action:none;cursor:move;border-radius:14px}
+::-webkit-scrollbar{height:9px;width:9px}::-webkit-scrollbar-thumb{background:var(--pink-200);border-radius:99px}
+</style>
+</head>
+<body>
+
+<header class="hdr"><div class="hdr-in">
+  <div id="bowLogo" style="width:46px;flex:none"></div>
+  <div class="logo-txt"><b>CovaTelle</b><span>Pastry Boutique</span></div>
+  <div class="sync-pill"><span class="dot" id="syncDot"></span><span id="syncTxt">connecting…</span></div>
+</div></header>
+
+<div class="wrap">
+
+<!-- ============ HOME ============ -->
+<section id="view-home" class="view active">
+  <div class="card rel">
+    <div class="ribbon-deco" id="bowDeco1"></div>
+    <div class="ctitle" style="margin-bottom:6px"><span class="em">🎀</span> Welcome back, Baker!</div>
+    <p class="hint" style="max-width:560px">Scan receipts from Shopee, Robinsons, or any store — CovaTelle auto-reads the <b>item name, quantity & price</b>, organizes them in an Excel-style ledger with <b>photos, barcodes, PD &amp; expiration</b>, computes your <b>food costing</b>, at may <b>Orders Calendar</b> para sa bookings mo — lahat naka-sync realtime. ✨</p>
+    <div class="row-flex" style="margin-top:14px">
+      <button class="btn btn-pink" onclick="go('scan')">📸 Scan a Receipt</button>
+      <button class="btn btn-gold" onclick="openEditor()">✏️ Add Expense Manually</button>
+    </div>
+  </div>
+
+  <div class="stats" id="homeStats" style="margin-top:14px"></div>
+
+  <div class="grid2" style="margin-top:14px">
+    <div class="card">
+      <div class="ctitle"><span class="em">☁️</span> Auto Cloud Sync</div>
+      <p class="hint">Naka-sync automatically sa cloud — kahit anong device, buksan mo lang ito at updated na lahat. <b>Walang Workspace ID needed</b>, walang mawawalang data. 💾✨</p>
+      <p class="hint" style="margin-top:8px" id="wsHint"></p>
+    </div>
+    <div class="card">
+      <div class="ctitle"><span class="em">📤</span> Export to Excel</div>
+      <p class="hint">Download your whole ledger anytime — receipts, ingredients, costing — as <b>.xlsx</b> files you can open in Excel / Google Sheets. 📊</p>
+      <div class="row-flex" style="margin-top:12px">
+        <button class="btn btn-ghost btn-sm" onclick="exportExpenses()">⬇️ Expenses .xlsx</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportCostings()">⬇️ Costing .xlsx</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle"><span class="em">📋</span> Recent Receipts</div>
+    <div id="homeRecent"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="ctitle"><span class="em">⏳</span> Expiring Soon (PD/EXP)</div>
+      <div id="homeExpiry"></div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><span class="em">🗓️</span> Upcoming Orders</div>
+      <div id="homeOrders"></div>
+      <button class="btn btn-pink btn-sm" style="margin-top:10px" onclick="go('orders')">Open Orders Calendar →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCAN ============ -->
+<section id="view-scan" class="view">
+  <div class="card">
+    <div class="ctitle"><span class="em">📸</span> Receipt Scanner <span class="chip gold">AI Reader</span></div>
+    <div class="drop" id="drop">
+      <div class="big">🧾</div>
+      <b>Drop receipt images here</b>
+      <p>Shopee screenshot, Robinsons receipt, grocery OR — pwede <b>maraming images sabay-sabay</b> (bulk upload)</p>
+      <input type="file" id="fileIn" accept="image/*" multiple hidden>
+    </div>
+    <div class="row-flex" style="margin-top:12px">
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('fileIn').click()">🖼 Choose Image</button>
+      <button class="btn btn-ghost btn-sm" onclick="openTextModal()">⌨️ Paste Text Instead</button>
+      <button class="btn btn-ghost btn-sm" onclick="loadSample()">✨ Try Sample</button>
+    </div>
+    <div class="prog" id="prog"><i id="progBar"></i></div>
+    <p class="hint" id="ocrStatus" style="margin-top:8px"></p>
+    <details class="raw" id="rawWrap" style="display:none"><summary>View raw text read by scanner</summary><pre id="rawText"></pre></details>
+  </div>
+
+  <div class="card" id="scanResultCard" style="display:none">
+    <div class="ctitle"><span class="em">🎀</span> Extracted Items <span class="chip" id="scanMeta"></span></div>
+    <p class="hint" style="margin-bottom:10px">Review mo lahat — editable bago i-save. Pwede mag-dagdag ng <b>📷 pic</b>, <b>PD</b> (production date), <b>EXP</b> (expiration) per item, at fare per receipt. 💗</p>
+    <div class="tbl-scroll"><table class="xt" id="scanTable"></table></div>
+    <div class="row-flex" style="margin-top:14px">
+      <button class="btn btn-pink" onclick="saveScanBatches()">💾 Save All Receipts</button>
+      <button class="btn btn-ghost" onclick="addScanRow()">+ Add Row</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ EXPENSES ============ -->
+<section id="view-expenses" class="view">
+  <div class="card">
+    <div class="ctitle"><span class="em">📒</span> Expense Ledger <span class="chip" id="expCount"></span></div>
+    <div class="row-flex">
+      <div><label class="lbl">Month</label><input type="month" class="inp" id="fMonth"></div>
+      <div><label class="lbl">Category</label><select class="inp" id="fCat">
+        <option value="">All</option><option>Ingredients</option><option>Packaging</option><option>Supplies</option><option>Utilities</option><option>Fare/Transport</option><option>Other</option></select></div>
+      <div><label class="lbl">Search shop / item</label><input class="inp" id="fSearch" placeholder="e.g. Robinsons"></div>
+    </div>
+  </div>
+  <div class="stats" id="expStats" style="margin:14px 0"></div>
+  <div class="card">
+    <div class="tbl-scroll"><table class="xt" id="expTable" style="min-width:1020px"></table></div>
+    <div class="row-flex" style="margin-top:14px">
+      <button class="btn btn-gold" onclick="exportExpenses()">⬇️ Export Excel (.xlsx)</button>
+      <button class="btn btn-ghost" onclick="exportExpensesCSV()">⬇️ CSV</button>
+      <button class="btn btn-pink" onclick="openEditor()">+ New Entry</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COSTING ============ -->
+<section id="view-costing" class="view">
+  <div class="card rel">
+    <div class="ribbon-deco" id="bowDeco2"></div>
+    <div class="ctitle"><span class="em">👩‍🍳</span> Food Costing Calculator</div>
+    <input type="hidden" id="cId">
+    <div class="row-flex">
+      <div style="flex:2"><label class="lbl">Recipe / Product name</label><input class="inp" id="cName" placeholder="e.g. Classic Chocolate Cake 8&quot;"></div>
+      <div><label class="lbl">Yield (pcs/servings)</label><input class="inp" id="cYield" type="number" min="1" value="1" oninput="calcCosting()"></div>
+    </div>
+    <label class="lbl" style="margin-top:14px">Ingredients</label>
+    <div class="tbl-scroll"><table class="xt" id="costIngTable" style="min-width:560px"></table></div>
+    <div class="row-flex" style="margin-top:12px">
+      <div><label class="lbl">Packaging ₱</label><input class="inp" id="cPack" type="number" min="0" step="0.01" value="0" oninput="calcCosting()"></div>
+      <div><label class="lbl">Gas/Overhead ₱</label><input class="inp" id="cOver" type="number" min="0" step="0.01" value="0" oninput="calcCosting()"></div>
+      <div><label class="lbl">Labor ₱</label><input class="inp" id="cLabor" type="number" min="0" step="0.01" value="0" oninput="calcCosting()"></div>
+      <div><label class="lbl">Markup %</label><input class="inp" id="cMarkup" type="number" min="0" value="30" oninput="calcCosting()"></div>
+    </div>
+    <div class="costbox" id="costBox" style="margin-top:14px"></div>
+    <div class="row-flex" style="margin-top:14px">
+      <button class="btn btn-pink" onclick="saveCosting()">💾 Save Recipe</button>
+      <button class="btn btn-ghost" onclick="clearCostingForm()">Clear</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle"><span class="em">🍰</span> Saved Recipes</div>
+    <div id="costList"></div>
+  </div>
+</section>
+
+<!-- ============ ORDERS ============ -->
+<section id="view-orders" class="view">
+  <div class="card">
+    <div class="ctitle"><span class="em">🗓️</span> Orders Calendar <span class="chip gold" id="ordMonthChip"></span></div>
+    <div class="row-flex" style="align-items:center;margin-bottom:12px">
+      <button class="btn btn-ghost btn-sm" style="flex:0 0 auto" onclick="calShift(-1)">← Prev</button>
+      <b id="calLabel" style="flex:1;text-align:center;font-size:15px"></b>
+      <button class="btn btn-ghost btn-sm" style="flex:0 0 auto" onclick="calShift(1)">Next →</button>
+      <button class="btn btn-gold btn-sm" style="flex:0 0 auto" onclick="calShift(0)">Today</button>
+    </div>
+    <div class="cal" id="calGrid"></div>
+    <div class="sep"></div>
+    <div class="row-flex">
+      <div class="stat" style="flex:1"><span id="calDayLabel">Selected day sales</span><b id="calDayTotal"></b></div>
+      <div class="stat gold" style="flex:1"><span>Month sales</span><b id="calMonthTotal"></b></div>
+    </div>
+    <p class="hint" style="margin-top:8px">Tip: i-tap ang araw sa calendar para pumili ng date, tapos i-fill up ang order form sa baba. 🎂</p>
+  </div>
+
+  <div class="card" id="orderFormCard">
+    <div class="ctitle"><span class="em">🧾</span> <span id="ordFormTitle">New Order</span></div>
+    <input type="hidden" id="oId">
+    <div class="row-flex">
+      <div><label class="lbl">Date (pickup / delivery)</label><input type="date" class="inp" id="oDate"></div>
+      <div style="flex:2"><label class="lbl">Customer name</label><input class="inp" id="oCust" placeholder="e.g. Maria Santos"></div>
+      <div><label class="lbl">Status</label><select class="inp" id="oStatus"><option>New</option><option>Baking</option><option>Ready</option><option>Done</option><option>Cancelled</option></select></div>
+    </div>
+    <label class="lbl" style="margin-top:12px">Order items (auto-suggest mula sa recipes mo)</label>
+    <div class="tbl-scroll"><table class="xt" id="oItems" style="min-width:560px"></table></div>
+    <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="addOrderRow()">+ Add item</button>
+    <div class="row-flex" style="margin-top:12px">
+      <div style="flex:2"><label class="lbl">Note (design, dedication, allergen, etc.)</label><input class="inp" id="oNote" placeholder="optional"></div>
+    </div>
+    <div class="costbox" id="oTotalBox" style="margin-top:12px"></div>
+    <div class="row-flex" style="margin-top:12px">
+      <button class="btn btn-pink" onclick="saveOrder()">💾 Save Order</button>
+      <button class="btn btn-ghost" onclick="clearOrderForm()">Clear</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle"><span class="em">📋</span> Orders <span class="chip" id="ordCount"></span></div>
+    <div class="pill-tabs" id="ordFilters"></div>
+    <div class="tbl-scroll"><table class="xt" id="ordTable" style="min-width:680px"></table></div>
+  </div>
+</section>
+
+<!-- ============ INSIGHTS ============ -->
+<section id="view-insights" class="view">
+  <div class="card">
+    <div class="ctitle"><span class="em">📊</span> Spending Insights</div>
+    <div class="stats" id="insStats"></div>
+    <div class="sep"></div>
+    <b style="font-size:13px">By Category (this month)</b>
+    <div id="insBars" style="margin-top:8px"></div>
+    <div class="sep"></div>
+    <b style="font-size:13px">Top Shops</b>
+    <div id="insShops" style="margin-top:8px"></div>
+  </div>
+</section>
+</div>
+
+<!-- ============ TAB BAR ============ -->
+<nav class="tabbar">
+  <button class="tab active" data-v="home" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg>Home</button>
+  <button class="tab" data-v="expenses" onclick="go('expenses')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M8 4v5M16 4v5M7 13h4M7 17h7"/></svg>Ledger</button>
+  <button class="tab" data-v="orders" onclick="go('orders')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 4v5M16 4v5M8 14h3M8 18h6"/></svg>Orders</button>
+  <div class="fab" onclick="go('scan')" title="Scan receipt"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg></div>
+  <button class="tab" data-v="costing" onclick="go('costing')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10l-1.5 7a3.5 3.5 0 0 1-7 0L7 3z"/><path d="M12 13v3a4 4 0 0 0 8 0v-1"/><path d="M4 20c1.5-2 4-2 5.5-1"/></svg>Costing</button>
+  <button class="tab" data-v="insights" onclick="go('insights')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>Insights</button>
+</nav>
+
+<!-- ============ EXPENSE EDITOR MODAL ============ -->
+<div class="modal" id="editorModal">
+  <div class="sheet">
+    <div class="grab"></div>
+    <div class="ctitle"><span class="em">🎀</span> <span id="edTitle">New Expense Entry</span></div>
+    <input type="hidden" id="eId">
+    <div class="row-flex">
+      <div><label class="lbl">Date</label><input type="date" class="inp" id="eDate"></div>
+      <div style="flex:2"><label class="lbl">Shop / Supplier</label><input class="inp" id="eShop" placeholder="e.g. Robinsons Supermarket"></div>
+      <div><label class="lbl">Category</label><select class="inp" id="eCat"><option>Ingredients</option><option>Packaging</option><option>Supplies</option><option>Utilities</option><option>Fare/Transport</option><option>Other</option></select></div>
+    </div>
+    <label class="lbl" style="margin-top:12px">Items (📷 pic · PD = production date · EXP = expiration)</label>
+    <div class="tbl-scroll"><table class="xt" id="eItems" style="min-width:560px"></table></div>
+    <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="addEditorRow()">+ Add item</button>
+    <div class="row-flex" style="margin-top:12px">
+      <div><label class="lbl">Fare ₱ (optional)</label><input class="inp" id="eFare" type="number" min="0" step="0.01" value="0" oninput="editorTotals()"></div>
+      <div><label class="lbl">Others ₱ (optional)</label><input class="inp" id="eOther" type="number" min="0" step="0.01" value="0" oninput="editorTotals()"></div>
+      <div><label class="lbl">Note</label><input class="inp" id="eNote" placeholder="optional"></div>
+    </div>
+    <div class="costbox" id="eTotalBox" style="margin-top:12px"></div>
+    <div class="row-flex" style="margin-top:14px">
+      <button class="btn btn-pink" onclick="saveFromEditor()">💾 Save</button>
+      <button class="btn btn-ghost" onclick="closeModal('editorModal')">Cancel</button>
+      <button class="btn btn-danger" id="eDeleteBtn" style="display:none" onclick="deleteFromEditor()">🗑 Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PASTE TEXT MODAL ============ -->
+<div class="modal" id="textModal">
+  <div class="sheet">
+    <div class="grab"></div>
+    <div class="ctitle"><span class="em">⌨️</span> Paste Receipt Text</div>
+    <p class="hint" style="margin-bottom:8px">Kung hirap i-OCR ang image, i-copy paste mo rito ang text ng receipt (o i-type mo). Same smart parser pa rin. 🧠</p>
+    <textarea class="inp" id="pasteArea" rows="8" placeholder="e.g.&#10;ALASKA FRESH MILK 1L&#10;2 X P198.00/Unit 396.00 V&#10;MAYA ALL PURPOSE FLO&#10;433.50 V"></textarea>
+    <div class="row-flex" style="margin-top:12px">
+      <button class="btn btn-pink" onclick="parsePasted()">✨ Extract Items</button>
+      <button class="btn btn-ghost" onclick="closeModal('textModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ITEM PHOTO CROP MODAL ============ -->
+<div class="modal" id="cropModal">
+  <div class="sheet" style="max-width:520px">
+    <div class="grab"></div>
+    <div class="ctitle"><span class="em">📷</span> Item Photo (optional)</div>
+    <p class="hint" style="margin-bottom:8px">I-crop mo lang yung part na kailangan — parang Shopee. Drag para ilipat, slider para i-zoom.</p>
+    <div class="crop-wrap"><canvas id="cropCanvas" width="360" height="360"></canvas></div>
+    <label class="lbl">Zoom</label>
+    <input type="range" id="cropZoom" min="1" max="3" step="0.01" value="1" style="width:100%">
+    <input type="file" id="cropFile" accept="image/*" hidden>
+    <div class="row-flex" style="margin-top:12px">
+      <button class="btn btn-ghost btn-sm" onclick="$('cropFile').click()">🖼 Choose Photo</button>
+      <button class="btn btn-pink btn-sm" onclick="applyCrop()">✔ Use Photo</button>
+      <button class="btn btn-danger btn-sm" onclick="clearCropTarget()">🗑 Remove</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('cropModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==================== FIREBASE CONFIG (from shared/js/firebase-config.js — inlined so this file works standalone) ==================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyAeN8HFUvdfCH4U7veGjo-a9-Pqv6Nd008",
+  authDomain: "dgc-estore.firebaseapp.com",
+  databaseURL: "https://dgc-estore-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "dgc-estore",
+  storageBucket: "dgc-estore.firebasestorage.app",
+  messagingSenderId: "620416266904",
+  appId: "1:620416266904:web:f4c2a075d1c48853ae16ed",
+  measurementId: "G-2MJ9HTQ3HH"
+};
+let db = null, FB_ON = false;
+try { firebase.initializeApp(firebaseConfig); db = firebase.database(); FB_ON = true; } catch(e){ console.warn('Firebase offline:', e); }
+
+/* ==================== STATE ==================== */
+const WS = 'covatelle-main'; // auto cloud workspace — no setup needed
+let state = { expenses: [], costings: [], orders: [] };
+const LS_KEY = 'covatelle_data_v1';
+const $ = id => document.getElementById(id);
+const uid = () => 'L' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const fmt = n => '₱' + (Number(n)||0).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc = s => String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const todayISO = () => new Date().toISOString().slice(0,10);
+
+function persistLocal(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
+function loadLocal(){ try{ const d = JSON.parse(localStorage.getItem(LS_KEY)); if(d) state = {expenses:d.expenses||[], costings:d.costings||[], orders:d.orders||[]}; }catch(e){} }
+
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2400); }
+function closeModal(id){ $(id).classList.remove('open'); }
+
+/* ==================== BOWS ==================== */
+const BOW = sz => `<svg viewBox="0 0 140 84" width="${sz}" height="${sz*0.6}">
+<defs>
+<linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFA8C9"/><stop offset="1" stop-color="#F25D94"/></linearGradient>
+<linearGradient id="bg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F2DC9B"/><stop offset="1" stop-color="#C9A227"/></linearGradient>
+</defs>
+<path d="M70 34 C52 6 14 8 13 32 C12 54 52 52 70 40 Z" fill="url(#bg1)" stroke="#C9A227" stroke-width="2"/>
+<path d="M70 34 C88 6 126 8 127 32 C128 54 88 52 70 40 Z" fill="url(#bg1)" stroke="#C9A227" stroke-width="2"/>
+<path d="M66 42 L50 78 L62 70 L70 80 L74 44 Z" fill="url(#bg1)" stroke="#C9A227" stroke-width="1.5"/>
+<path d="M74 42 L92 76 L80 70 L72 80 L68 44 Z" fill="url(#bg1)" stroke="#C9A227" stroke-width="1.5"/>
+<rect x="61" y="27" width="18" height="18" rx="5.5" fill="url(#bg2)" stroke="#A9821F" stroke-width="1.5"/></svg>`;
+$('bowLogo').innerHTML = BOW(46); $('bowDeco1').innerHTML = BOW(96); $('bowDeco2').innerHTML = BOW(96);
+
+/* ==================== NAV ==================== */
+function go(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  $('view-'+v).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.v===v));
+  window.scrollTo({top:0});
+  if(v==='expenses') renderExpenses();
+  if(v==='insights') renderInsights();
+  if(v==='costing'){ renderCostList(); }
+  if(v==='orders'){ renderCalendar(); }
+  if(v==='home') renderHome();
+}
+
+/* ==================== SYNC (realtime, multi-device) ==================== */
+const wsRef = n => db.ref('workspaces/' + WS + '/' + n);
+function setSync(on, label){
+  const d=$('syncDot'); d.className='dot '+(on?'on':'local');
+  $('syncTxt').textContent = label;
+}
+function attachSync(){
+  if(!FB_ON){ setSync(false,'local only'); $('wsHint').textContent='Offline mode — data stays on this device and auto-syncs kapag bumalik ang internet. 🔄'; return; }
+  try{
+    db.ref('.info/connected').on('value', s=> setSync(!!s.val(), s.val()?'live sync':'reconnecting…'));
+    wsRef('expenses').on('value', s=>{
+      const v = s.val()||{};
+      state.expenses = Object.values(v).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+      persistLocal(); renderAll();
+      uploadLocals(); // push any local-only records to this workspace
+    });
+    wsRef('costings').on('value', s=>{
+      const v = s.val()||{};
+      state.costings = Object.values(v).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+      persistLocal(); renderAll();
+      uploadLocals();
+    });
+    wsRef('orders').on('value', s=>{
+      const v = s.val()||{};
+      state.orders = Object.values(v).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+      persistLocal(); renderAll();
+      uploadLocals();
+    });
+    $('wsHint').textContent = '☁️ Live — receipts, recipes, orders, photos at barcodes mo ay naka-save sa cloud automatically. Buksan mo lang ito sa ibang device at nandiyan na lahat. 🪄';
+  }catch(e){ setSync(false,'local only'); }
+}
+function uploadLocals(){
+  if(!FB_ON) return;
+  state.expenses.filter(e=>String(e.id).startsWith('L')).forEach(e=>{
+    const ref = wsRef('expenses').push(); e.id = ref.key; ref.set(e).catch(()=>{});
+  });
+  state.costings.filter(c=>String(c.id).startsWith('L')).forEach(c=>{
+    const ref = wsRef('costings').push(); c.id = ref.key; ref.set(c).catch(()=>{});
+  });
+  state.orders.filter(o=>String(o.id).startsWith('L')).forEach(o=>{
+    const ref = wsRef('orders').push(); o.id = ref.key; ref.set(o).catch(()=>{});
+  });
+  persistLocal();
+}
+/* ==================== CRUD ==================== */
+function saveExpense(exp){
+  exp.createdAt = exp.createdAt || Date.now();
+  if(!exp.id) exp.id = FB_ON ? wsRef('expenses').push().key : uid();
+  state.expenses = [exp, ...state.expenses.filter(e=>e.id!==exp.id)];
+  persistLocal(); renderAll();
+  if(FB_ON) wsRef('expenses/'+exp.id).set(exp).catch(()=>toast('Saved on device — will sync when online'));
+  toast('Saved 🎀');
+}
+function deleteExpense(id){
+  state.expenses = state.expenses.filter(e=>e.id!==id);
+  persistLocal(); renderAll();
+  if(FB_ON && !String(id).startsWith('L')) wsRef('expenses/'+id).remove().catch(()=>{});
+  toast('Deleted');
+}
+function saveCostingDoc(c){
+  c.createdAt = c.createdAt || Date.now();
+  if(!c.id) c.id = FB_ON ? wsRef('costings').push().key : uid();
+  state.costings = [c, ...state.costings.filter(x=>x.id!==c.id)];
+  persistLocal(); renderAll();
+  if(FB_ON) wsRef('costings/'+c.id).set(c).catch(()=>{});
+  toast('Recipe saved 🍰');
+}
+function deleteCosting(id){
+  state.costings = state.costings.filter(c=>c.id!==id);
+  persistLocal(); renderAll();
+  if(FB_ON && !String(id).startsWith('L')) wsRef('costings/'+id).remove().catch(()=>{});
+  toast('Deleted');
+}
+/* ==================== BARCODE & EXPIRY HELPERS ==================== */
+function barcodeFor(name){
+  const s=String(name||'').toUpperCase().trim(); let h=7;
+  for(let i=0;i<s.length;i++){ h=(h*31 + s.charCodeAt(i))>>>0; }
+  return 'CT' + String(h).padStart(9,'0');
+}
+function expBadge(exp){
+  if(!exp) return '<span class="hint">—</span>';
+  const diff=Math.round((new Date(exp+'T00:00:00')-new Date(todayISO()+'T00:00:00'))/86400000);
+  const cls=diff<0?'exp-bad':diff<=7?'exp-warn':'hint';
+  const txt=diff<0?'EXPIRED '+Math.abs(diff)+'d ago':diff===0?'EXP today':'EXP in '+diff+'d';
+  return `<span class="${cls}" style="font-size:11px">${txt}<br><span class="hint">${exp}</span></span>`;
+}
+function expiringSoon(){
+  const now=new Date(todayISO()+'T00:00:00'); const out=[];
+  (state.expenses||[]).forEach(e=>(e.items||[]).forEach(it=>{
+    if(!it.exp) return;
+    const diff=Math.round((new Date(it.exp+'T00:00:00')-now)/86400000);
+    if(diff<=7) out.push({...it, shop:e.shop, diff});
+  }));
+  return out.sort((a,b)=>a.diff-b.diff).slice(0,6);
+}
+
+function renderAll(){ renderHome(); renderExpenses(); renderCostList(); renderInsights(); renderCalendar(); }
+
+/* ==================== SMART RECEIPT PARSER ==================== */
+const STOP = /\b(total|change|cash|vatable|vat|zero rated|sales|invoice|si|or|sn|min|tin|reg|machine|serial|thank|customer|cashier|pos|terminal)\b|s\.i\.|or #/i;
+const CATS = [
+  {re:/milk|flour|sugar|butter|oil|salt|egg|vanilla|cocoa|chocolate|cream|milo|yeast|baking|marga|cheese| condensed|evaporated/i, cat:'Ingredients'},
+  {re:/box|ribbon|cup|topper|squeeze|bottle|packaging|paper|bag|tape|wrap|stand|candle|gold|silver|board|doilie|dolly/i, cat:'Packaging'},
+];
+function suggestCat(name){ const h = CATS.find(c=>c.re.test(name)); return h?h.cat:'Supplies'; }
+function cleanName(s){ return s.replace(/\b\d{8,14}\b/g,' ').replace(/(?:₱|\bP)\s?\d[\d,.]*/g,' ').replace(/\s{2,}/g,' ').replace(/\s+[VN]\s*$/,'').trim(); }
+
+function parseReceiptText(raw){
+  const lines = raw.split(/\r?\n/).map(l=>l.replace(/\s+/g,' ').trim()).filter(Boolean);
+  const items=[]; let shop='', date='', total=null;
+  const used = lines.map(()=>false);
+  const pmoney = s => { const m=s.match(/[₱P]\s?(\d[\d,]*(?:\.\d{1,2})?)/); return m?parseFloat(m[1].replace(/,/g,'')):null; };
+  const lastMoney = s => { const ms=s.match(/[₱P]\s?(\d[\d,]*(?:\.\d{1,2})?)/gi); if(!ms) return null; return parseFloat(ms[ms.length-1].replace(/[₱P\s,]/g,'')); };
+
+  // shop + date + total
+  const known=['robinsons','shopee','puregold','watsons','mercury','lazada','savemore','all day','nipin','umi mall','packagingstore','sm ','supermarket','grocery'];
+  for(const l of lines){
+    if(!date){ const d=l.match(/\b(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})\b/); if(d){ const y=d[3].length===2?'20'+d[3]:d[3]; date=`${y}-${d[2].padStart(2,'0')}-${d[1].padStart(2,'0')}`; } }
+    if(!shop && known.some(k=>l.toLowerCase().includes(k))) shop=cleanName(l).slice(0,42);
+    const t=l.match(/total\s*(?:[\d,]+\s*)?(?:item|pcs|pc|order)?s?\s*[:\-]?\s*[₱P]?\s?(\d[\d,]*(?:\.\d{1,2})?)/i);
+    if(t && total===null && !/grand|sub-?total/i.test(l)){ total=parseFloat(t[1].replace(/,/g,'')); }
+  }
+  if(!shop) shop = lines.length? cleanName(lines[0]).slice(0,42) : '';
+
+  const takePrevName = i => {
+    for(let j=i-1;j>=0 && j>=i-2;j--){
+      if(!used[j] && !STOP.test(lines[j]) && !/\d\s*[x×]/i.test(lines[j]) && !/^\s*[₱P]?\s?\d[\d,]*\.\d{2}\s*[VN]?\s*$/i.test(lines[j])){
+        const n = cleanName(lines[j]); if(n.length>2){ used[j]=true; return n; }
+      }
+    } return 'Item';
+  };
+
+  // A) "2 X P198.00/Unit 396.00 V"
+  lines.forEach((l,i)=>{
+    const m=l.match(/\b(\d{1,3})\s*[x×]\s*[₱P]?\s?(\d[\d,]*(?:\.\d{1,2})?)\s*(?:\/\s*(?:unit|pc|pcs|each))?/i);
+    if(m && !used[i] && !STOP.test(l)){
+      items.push({name:takePrevName(i), qty:+m[1], price:parseFloat(m[2].replace(/,/g,''))}); used[i]=true;
+    }
+  });
+  // B) "NAME ... 49.00 V" or "NAME ... ₱49.00"
+  lines.forEach((l,i)=>{
+    if(used[i]) return;
+    let m=l.match(/^(.*?)\s+(\d[\d,]*\.\d{2})\s*[VN]\s*$/);
+    if(m && !STOP.test(l)){ const n=cleanName(m[1]); if(n.length>2){ items.push({name:n,qty:1,price:parseFloat(m[2].replace(/,/g,''))}); used[i]=true; return; } }
+    if(used[i]) return;
+    m=l.match(/^(.*?)\s+[₱P]\s?(\d[\d,]*(?:\.\d{1,2})?)\s*$/i);
+    if(m && !STOP.test(l)){ const n=cleanName(m[1]); if(n.length>2 && !/delivered|order|return|preferred/i.test(n)){ items.push({name:n,qty:1,price:parseFloat(m[2].replace(/,/g,''))}); used[i]=true; } }
+  });
+  // C) orphan amounts: "44.50 N", "₱78"  (name = previous line)
+  lines.forEach((l,i)=>{
+    if(used[i] || STOP.test(l)) return;
+    const om=l.match(/^\s*[₱P]?\s?(\d[\d,]*\.\d{2})\s*[VN]?\s*$/i);
+    if(om){
+      const n=takePrevName(i); if(n!=='Item'){ items.push({name:n,qty:1,price:parseFloat(om[1].replace(/,/g,''))}); used[i]=true; }
+    }
+  });
+  // D) Shopee "x1" lines
+  lines.forEach((l,i)=>{
+    if(used[i]) return;
+    const m=l.match(/^x\s*(\d+)\s*$/i);
+    if(m){
+      let price=null;
+      for(let j=i+1;j<=Math.min(i+2,lines.length-1);j++){ if(!used[j]){ const p=lastMoney(lines[j]); if(p!==null){ price=p; used[j]=true; break; } } }
+      if(price===null && total!==null) price=total;
+      const n=takePrevName(i);
+      items.push({name:n==='Item'?'Shopee item':n, qty:+m[1], price});
+      used[i]=true;
+    }
+  });
+  // fallback
+  if(!items.length && total!==null) items.push({name:'Order total', qty:1, price:total});
+  // merge duplicates
+  const seen={}; const out=[];
+  items.forEach(it=>{ const k=it.name.toLowerCase(); if(seen[k]){ seen[k].qty+=it.qty; } else { seen[k]=it; out.push(it); } });
+  return { items:out, shop, date, total };
+}
+
+/* ==================== SCAN FLOW (bulk multi-image) ==================== */
+let scanBatches=[]; // {shop,date,fare,items:[{name,qty,price,photo,pd,exp}]}
+const drop=$('drop'), fileIn=$('fileIn');
+drop.onclick=()=>fileIn.click();
+['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over');}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over');}));
+drop.addEventListener('drop',e=>{ if(e.dataTransfer.files.length) runOCRBatch(e.dataTransfer.files); });
+fileIn.onchange=()=>{ if(fileIn.files.length) runOCRBatch(fileIn.files); fileIn.value=''; };
+
+async function runOCRBatch(fileList){
+  $('rawWrap').style.display='none'; $('scanResultCard').style.display='none';
+  const prog=$('prog'), bar=$('progBar'), st=$('ocrStatus');
+  prog.style.display='block';
+  const files=[...fileList].filter(f=>f.type.startsWith('image/'));
+  if(!files.length){ toast('Choose image files'); prog.style.display='none'; return; }
+  st.textContent=`Reading ${files.length} image(s)… 📖 (first scan downloads the AI reader, next ones are fast)`;
+  const raws=[];
+  for(let i=0;i<files.length;i++){
+    try{
+      st.textContent=`Scanning ${i+1} of ${files.length}: ${files[i].name}…`;
+      const res=await Tesseract.recognize(files[i],'eng',{ logger:m=>{ if(m.status==='recognizing text') bar.style.width=Math.round(((i+m.progress)/files.length)*96)+'%'; } });
+      const text=res.data.text||''; raws.push('===== '+(files[i].name||('image '+(i+1)))+' =====\n'+text);
+      const r=parseReceiptText(text);
+      if(r.items.length) scanBatches.push({shop:r.shop,date:r.date||todayISO(),fare:0,items:r.items.map(it=>({...it,photo:'',pd:'',exp:''}))});
+    }catch(e){ console.warn(e); raws.push('(failed: '+(files[i].name||'image')+')'); }
+  }
+  bar.style.width='100%';
+  st.textContent = scanBatches.length ? `Done! ${scanBatches.length} receipt(s), ${scanBatches.reduce((s,b)=>s+b.items.length,0)} items — review & save lahat ✨` : 'No items detected — try clearer photos or "Paste Text Instead".';
+  if(raws.length){ $('rawText').textContent=raws.join('\n\n'); $('rawWrap').style.display='block'; }
+  if(scanBatches.length){
+    $('scanMeta').textContent=scanBatches.length+' receipt(s) · '+scanBatches.reduce((s,b)=>s+b.items.length,0)+' item(s)';
+    renderScanTable(); $('scanResultCard').style.display='block';
+    $('scanResultCard').scrollIntoView({behavior:'smooth'});
+  }
+  setTimeout(()=>{ prog.style.display='none'; },700);
+}
+function openTextModal(){ $('pasteArea').value=''; $('textModal').classList.add('open'); }
+function parsePasted(){
+  const t=$('pasteArea').value.trim();
+  if(!t){ toast('Paste some receipt text first'); return; }
+  closeModal('textModal'); handleParsed(t); $('ocrStatus').textContent='Parsed from pasted text ✨';
+}
+function loadSample(){
+  handleParsed(`ROBINSONS SUPERMARKET
+SALES INVOICE
+ALASKA FRESH MILK 1L 04800575240490
+2 X P198.00/Unit 396.00 V
+EAGLE BROWN SUGAR 50
+44.50 N
+EMBORG UHT WHIP CREA 05701215046399
+699.00 V
+MAG BUTTERCUP 200G B 04805358003422
+7 X P92.00/Unit 644.00 V
+MAYA ALL PURPOSE FLO 04800137261151
+2 X P91.75/Unit 183.50 V
+MILO ACTIVGO 1KG 04800361418058
+2 X P321.00/Unit 642.00 V
+ROBINSONS REFINED SU 04800016000027
+5 X P80.00/Unit 400.00 V
+TOTAL P4,768.75
+CASH P5,000.00
+Change P231.25`);
+}
+function handleParsed(text){
+  $('rawText').textContent=text; $('rawWrap').style.display='block';
+  const r=parseReceiptText(text);
+  scanBatches=[{shop:r.shop,date:r.date||todayISO(),fare:0,items:r.items.map(it=>({...it,photo:'',pd:'',exp:''}))}];
+  $('scanMeta').textContent=r.items.length+' item(s) found · '+(r.shop||'unknown shop');
+  renderScanTable(); $('scanResultCard').style.display='block';
+  $('scanResultCard').scrollIntoView({behavior:'smooth'});
+}
+function phCell(ctx,b,i,photo){
+  return photo? `<img class="ph" src="${photo}" onclick="openCrop('${ctx}',${b},${i})" title="Tap to change photo">`
+   : `<button class="ph-btn" onclick="openCrop('${ctx}',${b},${i})" title="Add photo (optional)">📷</button>`;
+}
+function renderScanTable(){
+  let h=`<thead><tr><th style="width:48px">Pic</th><th>Item name</th><th style="width:58px">Qty</th><th style="width:94px">Unit ₱</th><th style="width:86px">Amount</th><th style="width:116px">PD</th><th style="width:116px">EXP</th><th style="width:28px"></th></tr></thead><tbody>`;
+  scanBatches.forEach((b,bi)=>{
+    h+=`<tr class="batch-head"><td colspan="8">🧾 Receipt ${bi+1} — shop <input class="inp" style="display:inline-block;width:180px;padding:5px 8px;font-size:12px" value="${esc(b.shop)}" placeholder="Shop name" oninput="scanBatches[${bi}].shop=this.value">
+      date <input type="date" class="inp dt" style="display:inline-block;width:130px" value="${b.date}" oninput="scanBatches[${bi}].date=this.value">
+      fare ₱ <input class="inp" style="display:inline-block;width:78px;padding:5px 8px;font-size:12px" type="number" min="0" step="0.01" value="${b.fare||0}" oninput="scanBatches[${bi}].fare=+this.value">
+      <button class="icobtn" style="float:right" title="Remove this receipt" onclick="scanBatches.splice(${bi},1);renderScanTable()">🗑</button></td></tr>`;
+    b.items.forEach((it,i)=>{
+      h+=`<tr><td>${phCell('scan',bi,i,it.photo)}</td>
+      <td><input class="inp" value="${esc(it.name)}" oninput="scanBatches[${bi}].items[${i}].name=this.value"></td>
+      <td><input class="inp num" type="number" min="0" step="any" value="${it.qty}" oninput="scanBatches[${bi}].items[${i}].qty=+this.value;scanRowAmt(${bi},${i})"></td>
+      <td><input class="inp num" type="number" min="0" step="0.01" value="${it.price??''}" oninput="scanBatches[${bi}].items[${i}].price=+this.value;scanRowAmt(${bi},${i})"></td>
+      <td class="num" id="samt${bi}_${i}">${fmt((it.qty||0)*(it.price||0))}</td>
+      <td><input type="date" class="inp dt" value="${it.pd||''}" title="Production date" oninput="scanBatches[${bi}].items[${i}].pd=this.value"></td>
+      <td><input type="date" class="inp dt" value="${it.exp||''}" title="Expiration date" oninput="scanBatches[${bi}].items[${i}].exp=this.value"></td>
+      <td><button class="icobtn" onclick="scanBatches[${bi}].items.splice(${i},1);renderScanTable()">✕</button></td></tr>`;
+    });
+  });
+  if(!scanBatches.length) h+=`<tr><td colspan="8"><div class="empty"><div class="bowwrap">${BOW(110)}</div>No receipts — add one manually below 👇</div></td></tr>`;
+  $('scanTable').innerHTML=h+'</tbody>';
+}
+function scanRowAmt(bi,i){ const it=scanBatches[bi].items[i]; $('samt'+bi+'_'+i).textContent=fmt((it.qty||0)*(it.price||0)); }
+function addScanRow(){ if(!scanBatches.length) scanBatches.push({shop:'',date:todayISO(),fare:0,items:[]}); scanBatches[scanBatches.length-1].items.push({name:'',qty:1,price:'',photo:'',pd:'',exp:''}); renderScanTable(); }
+function saveScanBatches(){
+  let n=0;
+  scanBatches.forEach((b,bi)=>{
+    const items=b.items.filter(i=>String(i.name).trim() && Number(i.price)>0);
+    if(!items.length) return;
+    saveExpense({ date:b.date||todayISO(), shop:(b.shop||'').trim()||'—', category:suggestCat(items[0].name),
+      items:items.map(i=>({name:String(i.name).trim(),qty:+i.qty||1,price:+i.price,photo:i.photo||'',pd:i.pd||'',exp:i.exp||''})),
+      fare:+b.fare||0, other:0, note:'', createdAt:Date.now()+bi });
+    n++;
+  });
+  if(n){ toast(`Saved ${n} receipt(s) 🎀`); scanBatches=[]; $('scanResultCard').style.display='none'; go('expenses'); }
+  else toast('Add at least one item');
+}
+
+/* ==================== ITEM PHOTO + CROP (Shopee-style) ==================== */
+let crop={img:null, zoom:1, base:1, ox:0, oy:0, target:null, drag:null};
+function openCrop(ctx,b,i){
+  crop.target={ctx,b,i};
+  const it = ctx==='ed' ? edItems[i] : scanBatches[b].items[i];
+  if(it && it.photo){ crop.img=new Image(); crop.img.onload=()=>{fitCrop();drawCrop();}; crop.img.src=it.photo; }
+  else { crop.img=null; const c=$('cropCanvas').getContext('2d'); c.clearRect(0,0,360,360); c.fillStyle='#888'; c.font='13px sans-serif'; c.textAlign='center'; c.fillText('Choose a photo to crop',180,180); }
+  $('cropFile').value='';
+  $('cropModal').classList.add('open');
+}
+$('cropFile').onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=>{ crop.img=new Image(); crop.img.onload=()=>{ fitCrop(); drawCrop(); }; crop.img.src=rd.result; };
+  rd.readAsDataURL(f);
+};
+function fitCrop(){ if(!crop.img) return; crop.base=360/Math.max(crop.img.width,crop.img.height); crop.zoom=1; $('cropZoom').value=1; crop.ox=(360-crop.img.width*crop.base)/2; crop.oy=(360-crop.img.height*crop.base)/2; }
+function drawCrop(){
+  const c=$('cropCanvas').getContext('2d'); c.clearRect(0,0,360,360);
+  if(!crop.img) return;
+  c.drawImage(crop.img, crop.ox, crop.oy, crop.img.width*crop.base*crop.zoom, crop.img.height*crop.base*crop.zoom);
+}
+(function(){
+  const cv=$('cropCanvas');
+  cv.addEventListener('pointerdown',e=>{ crop.drag={x:e.offsetX-crop.ox,y:e.offsetY-crop.oy}; try{cv.setPointerCapture(e.pointerId);}catch(_){} });
+  cv.addEventListener('pointermove',e=>{ if(!crop.drag) return; crop.ox=e.offsetX-crop.drag.x; crop.oy=e.offsetY-crop.drag.y; drawCrop(); });
+  cv.addEventListener('pointerup',()=>{ crop.drag=null; });
+  $('cropZoom').oninput=e=>{ if(!crop.img) return; const z=+e.target.value; const cx=(180-crop.ox)/crop.zoom, cy=(180-crop.oy)/crop.zoom; crop.zoom=z; crop.ox=180-cx*z; crop.oy=180-cy*z; drawCrop(); };
+})();
+function applyCrop(){
+  if(!crop.img){ toast('Choose a photo first'); return; }
+  const t=crop.target; if(!t) return;
+  const data=$('cropCanvas').toDataURL('image/jpeg',0.72);
+  if(t.ctx==='ed'){ edItems[t.i].photo=data; renderEdItems(); editorTotals(); }
+  else { scanBatches[t.b].items[t.i].photo=data; renderScanTable(); }
+  closeModal('cropModal'); toast('Photo added 📷');
+}
+function clearCropTarget(){
+  const t=crop.target;
+  if(t){ if(t.ctx==='ed'){ edItems[t.i].photo=''; renderEdItems(); editorTotals(); } else { scanBatches[t.b].items[t.i].photo=''; renderScanTable(); } }
+  closeModal('cropModal');
+}
+
+/* ==================== EXPENSE EDITOR MODAL ==================== */
+let edItems=[];
+function openEditor(id, preset){
+  $('eId').value=id||'';
+  const src = preset || (id ? state.expenses.find(e=>e.id===id) : null);
+  $('eDate').value = src?.date || todayISO();
+  $('eShop').value = src?.shop || '';
+  $('eCat').value = src?.category || 'Ingredients';
+  $('eFare').value = src?.fare || 0;
+  $('eOther').value = src?.other || 0;
+  $('eNote').value = src?.note || '';
+  edItems = (src?.items?.length? src.items : [{name:'',qty:1,price:'',photo:'',pd:'',exp:''}]).map(i=>({...i}));
+  $('edTitle').textContent = id ? 'Edit Expense' : 'New Expense Entry';
+  $('eDeleteBtn').style.display = id ? '' : 'none';
+  renderEdItems(); editorTotals();
+  $('editorModal').classList.add('open');
+}
+function renderEdItems(){
+  let h=`<thead><tr><th style="width:48px">Pic</th><th>Item name</th><th style="width:56px">Qty</th><th style="width:92px">Unit ₱</th><th style="width:84px">Amount</th><th style="width:116px">PD</th><th style="width:116px">EXP</th><th style="width:28px"></th></tr></thead><tbody>`;
+  edItems.forEach((it,i)=>{
+    h+=`<tr><td>${phCell('ed',0,i,it.photo)}</td>
+    <td><input class="inp" list="ingList" value="${esc(it.name)}" oninput="edItems[${i}].name=this.value"></td>
+    <td><input class="inp num" type="number" min="0" step="any" value="${it.qty}" oninput="edItems[${i}].qty=+this.value;edRow(${i})"></td>
+    <td><input class="inp num" type="number" min="0" step="0.01" value="${it.price}" oninput="edItems[${i}].price=+this.value;edRow(${i})"></td>
+    <td class="num" id="eamt${i}">${fmt((+it.qty||0)*(+it.price||0))}</td>
+    <td><input type="date" class="inp dt" value="${it.pd||''}" title="Production date" oninput="edItems[${i}].pd=this.value"></td>
+    <td><input type="date" class="inp dt" value="${it.exp||''}" title="Expiration date" oninput="edItems[${i}].exp=this.value"></td>
+    <td><button class="icobtn" onclick="edItems.splice(${i},1);renderEdItems();editorTotals()">✕</button></td></tr>`;
+  });
+  const names=[...new Set(state.expenses.flatMap(e=>e.items||[]).map(i=>i.name).filter(Boolean))];
+  h+=`</tbody><datalist id="ingList">${names.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>`;
+  $('eItems').innerHTML=h;
+}
+function edRow(i){ $('eamt'+i).textContent=fmt((+edItems[i].qty||0)*(+edItems[i].price||0)); editorTotals(); }
+function addEditorRow(){ edItems.push({name:'',qty:1,price:'',photo:'',pd:'',exp:''}); renderEdItems(); editorTotals(); }
+function editorTotals(){
+  const sub=edItems.reduce((s,i)=>s+(+i.qty||0)*(+i.price||0),0);
+  const fare=+$('eFare').value||0, other=+$('eOther').value||0;
+  $('eTotalBox').innerHTML=`<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:center">
+    <div><span class="hint">Items subtotal</span><div style="font-weight:800">${fmt(sub)}</div></div>
+    <div><span class="hint">Fare</span><div style="font-weight:800">${fmt(fare)}</div></div>
+    <div><span class="hint">Others</span><div style="font-weight:800">${fmt(other)}</div></div>
+    <div style="text-align:right"><span class="hint">Receipt total</span><div class="big2">${fmt(sub+fare+other)}</div></div></div>`;
+}
+function saveFromEditor(){
+  const items=edItems.filter(i=>String(i.name).trim() && Number(i.price)>0);
+  if(!items.length){ toast('Add at least one valid item'); return; }
+  const id=$('eId').value||null;
+  const exp={ id, date:$('eDate').value||todayISO(), shop:$('eShop').value.trim()||'—', category:$('eCat').value,
+    items:items.map(i=>({name:String(i.name).trim(),qty:+i.qty||1,price:+i.price,photo:i.photo||'',pd:i.pd||'',exp:i.exp||''})),
+    fare:+$('eFare').value||0, other:+$('eOther').value||0, note:$('eNote').value.trim(),
+    createdAt: id ? (state.expenses.find(e=>e.id===id)?.createdAt||Date.now()) : Date.now() };
+  saveExpense(exp); closeModal('editorModal'); go('expenses');
+}
+function deleteFromEditor(){ const id=$('eId').value; closeModal('editorModal'); if(id) deleteExpense(id); }
+
+/* ==================== EXPENSES VIEW ==================== */
+function expFiltered(){
+  const m=$('fMonth').value, c=$('fCat').value, q=$('fSearch').value.trim().toLowerCase();
+  return state.expenses.filter(e=>{
+    if(m && !(e.date||'').startsWith(m)) return false;
+    if(c && e.category!==c) return false;
+    if(q && !((e.shop||'')+' '+e.items.map(i=>i.name).join(' ')).toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+function renderExpenses(){
+  if(!$('fMonth').value) $('fMonth').value=todayISO().slice(0,7);
+  const rows=[];
+  expFiltered().forEach(e=>{
+    (e.items||[]).forEach(it=>{
+      rows.push({e, it, amt:(+it.qty||0)*(+it.price||0)});
+    });
+  });
+  const sub=rows.reduce((s,r)=>s+r.amt,0), fare=rows.reduce((s,r)=>s+(+r.e.fare||0),0), other=rows.reduce((s,r)=>s+(+r.e.other||0),0);
+  $('expCount').textContent = state.expenses.length+' receipt(s) total';
+  $('expStats').innerHTML = `
+    <div class="stat"><span>Items subtotal</span><b>${fmt(sub)}</b></div>
+    <div class="stat gold"><span>Fare</span><b>${fmt(fare)}</b></div>
+    <div class="stat gold"><span>Others</span><b>${fmt(other)}</b></div>
+    <div class="stat"><span>Grand total</span><b style="color:var(--pink-600)">${fmt(sub+fare+other)}</b></div>`;
+  let h=`<thead><tr><th style="width:50px">Pic</th><th>Date</th><th>Shop</th><th>Category</th><th>Item + Barcode</th><th class="num">Qty</th><th class="num">Unit ₱</th><th class="num">Amount</th><th>PD</th><th>EXP</th><th class="num">Fare</th><th class="num">Other</th><th></th></tr></thead><tbody>`;
+  if(!rows.length) h+=`<tr><td colspan="13"><div class="empty"><div class="bowwrap">${BOW(110)}</div>No expenses yet — scan a receipt or add one manually! 🎀</div></td></tr>`;
+  rows.forEach((r,idx)=>{
+    const bc=barcodeFor(r.it.name);
+    const firstOfReceipt = idx===rows.findIndex(x=>x.e.id===r.e.id);
+    h+=`<tr>
+      <td>${r.it.photo?`<img class="ph" src="${r.it.photo}" onclick="window.open(this.src)" title="View photo">`:'<span class="hint" style="font-size:11px">—</span>'}</td>
+      <td style="white-space:nowrap">${esc(r.e.date)}</td>
+      <td><b>${esc(r.e.shop)}</b>${r.e.note?`<div class="hint">📝 ${esc(r.e.note)}</div>`:''}</td>
+      <td><span class="chip ${r.e.category==='Ingredients'?'gold':''}">${esc(r.e.category)}</span></td>
+      <td style="min-width:150px"><b>${esc(r.it.name)}</b><svg class="bc" data-bc="${bc}" style="display:block;margin-top:3px"></svg></td>
+      <td class="num">${r.it.qty}</td>
+      <td class="num">${fmt(r.it.price)}</td>
+      <td class="num"><b>${fmt(r.amt)}</b></td>
+      <td class="hint" style="white-space:nowrap;font-size:11px">${r.it.pd?esc(r.it.pd):'—'}</td>
+      <td style="white-space:nowrap">${expBadge(r.it.exp)}</td>
+      <td class="num">${firstOfReceipt?fmt(r.e.fare):''}</td>
+      <td class="num">${firstOfReceipt?fmt(r.e.other):''}</td>
+      <td style="white-space:nowrap">
+        <button class="icobtn" title="Edit receipt" onclick="openEditor('${r.e.id}')">✏️</button>
+      </td></tr>`;
+  });
+  h+=`</tbody><tfoot><tr><td colspan="7">Totals (filtered view)</td><td class="num">${fmt(sub)}</td><td></td><td></td><td class="num">${fmt(fare)}</td><td class="num">${fmt(other)}</td><td></td></tr></tfoot>`;
+  $('expTable').innerHTML=h;
+  if(window.JsBarcode){
+    document.querySelectorAll('#expTable svg.bc').forEach(s=>{ try{ JsBarcode(s, s.dataset.bc, {format:'CODE128', width:1, height:20, fontSize:9, margin:0, background:'#ffffff'}); }catch(e){} });
+  }
+}
+['fMonth','fCat','fSearch'].forEach(id=>{ document.addEventListener('input',e=>{ if(e.target.id===id) renderExpenses(); }); });
+
+/* ==================== EXPORTS ==================== */
+function dlXLSX(sheets, filename){
+  try{
+    const wb=XLSX.utils.book_new();
+    sheets.forEach(s=>XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(s.rows), s.name.slice(0,31)));
+    XLSX.writeFile(wb, filename); toast('Excel downloaded 📥');
+  }catch(e){ toast('Excel library not loaded (check internet) — try CSV'); }
+}
+function expenseRows(){
+  const rows=[];
+  expFiltered().forEach(e=>{
+    const sub=(e.items||[]).reduce((s,i)=>s+(+i.qty||0)*(+i.price||0),0);
+    const tot=sub+(+e.fare||0)+(+e.other||0);
+    (e.items||[]).forEach((it,ix)=>rows.push({
+      'Date':e.date,'Shop':e.shop,'Category':e.category,'Item':it.name,'Qty':it.qty,'Unit Price':(+it.price||0),
+      'Amount':(+it.qty||0)*(+it.price||0),'Fare':ix===0?(+e.fare||0):0,'Others':ix===0?(+e.other||0):0,
+      'Receipt Total':ix===0?tot:'','Note':ix===0?(e.note||''):''
+    }));
+  });
+  return rows;
+}
+function exportExpenses(){ dlXLSX([{name:'Expenses',rows:expenseRows()}],'CovaTelle-Expenses-'+todayISO()+'.xlsx'); }
+function exportExpensesCSV(){
+  const rows=expenseRows(); if(!rows.length){toast('Nothing to export');return;}
+  const cols=Object.keys(rows[0]);
+  const csv=[cols.join(',')].concat(rows.map(r=>cols.map(c=>`"${String(r[c]??'').replace(/"/g,'""')}"`).join(','))).join('\n');
+  dlBlob(csv,'CovaTelle-Expenses-'+todayISO()+'.csv','text/csv'); toast('CSV downloaded 📥');
+}
+function exportCostings(){
+  const recs=state.costings.map(c=>({ 'Recipe':c.name,'Yield':c.yield,'Ingredients Cost':c.ingCost,'Packaging':c.packaging,'Overhead':c.overhead,'Labor':c.labor,
+    'Total Cost':c.totalCost,'Cost/Pc':c.costPerPc,'Markup %':c.markup,'Suggested Price':c.price }));
+  const ings=[]; state.costings.forEach(c=>(c.ingredients||[]).forEach(i=>ings.push({'Recipe':c.name,'Ingredient':i.name,'Qty':i.qty,'Unit':i.unit,'Unit Cost':i.unitCost,'Cost':(+i.qty||0)*(+i.unitCost||0)})));
+  dlXLSX([{name:'Recipes',rows:recs},{name:'Ingredients',rows:ings}],'CovaTelle-FoodCosting-'+todayISO()+'.xlsx');
+}
+function dlBlob(content,name,type){
+  const b=new Blob([content],{type}); const a=document.createElement('a');
+  a.href=URL.createObjectURL(b); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+
+/* ==================== COSTING ==================== */
+let cIngs=[{name:'',qty:'',unit:'g',unitCost:''}];
+const UNITS=['g','kg','ml','L','pc','cup','tbsp','tsp','pack'];
+function renderCIng(){
+  let h=`<thead><tr><th>Ingredient</th><th style="width:74px">Qty</th><th style="width:72px">Unit</th><th style="width:96px">Unit cost ₱</th><th style="width:88px">Cost</th><th style="width:30px"></th></tr></thead><tbody>`;
+  cIngs.forEach((g,i)=>{
+    h+=`<tr><td><input class="inp" list="ingList" value="${esc(g.name)}" placeholder="e.g. All-purpose flour" oninput="cIngs[${i}].name=this.value"></td>
+    <td><input class="inp num" type="number" min="0" step="any" value="${g.qty}" oninput="cIngs[${i}].qty=+this.value;calcCosting()"></td>
+    <td><select class="inp" onchange="cIngs[${i}].unit=this.value">${UNITS.map(u=>`<option ${u===g.unit?'selected':''}>${u}</option>`).join('')}</select></td>
+    <td><input class="inp num" type="number" min="0" step="0.01" value="${g.unitCost}" oninput="cIngs[${i}].unitCost=+this.value;calcCosting()"></td>
+    <td class="num" id="ci${i}">${fmt((+g.qty||0)*(+g.unitCost||0))}</td>
+    <td><button class="icobtn" onclick="cIngs.splice(${i},1);renderCIng();calcCosting()">✕</button></td></tr>`;
+  });
+  h+='</tbody>'; $('costIngTable').innerHTML=h;
+}
+function addCIng(){ cIngs.push({name:'',qty:'',unit:'g',unitCost:''}); renderCIng(); }
+function calcCosting(){
+  const y=Math.max(1,+$('cYield').value||1);
+  const ing=cIngs.reduce((s,g)=>s+(+g.qty||0)*(+g.unitCost||0),0);
+  cIngs.forEach((g,i)=>{ const el=$('ci'+i); if(el) el.textContent=fmt((+g.qty||0)*(+g.unitCost||0)); });
+  const pack=+$('cPack').value||0, over=+$('cOver').value||0, labor=+$('cLabor').value||0, mk=+$('cMarkup').value||0;
+  const total=ing+pack+over+labor, per=total/y, price=per*(1+mk/100);
+  const sug=Math.max(1,Math.round(price*4)/4).toFixed(2);
+  $('costBox').innerHTML=`<div class="row-flex" style="align-items:center">
+    <div><span class="hint">Total recipe cost</span><div style="font-weight:800;font-size:17px">${fmt(total)}</div></div>
+    <div><span class="hint">Cost per piece</span><div style="font-weight:800;font-size:17px">${fmt(per)}</div></div>
+    <div><span class="hint">Food cost %</span><div style="font-weight:800;font-size:17px">${price?Math.round(per/price*100):0}%</div></div>
+    <div style="text-align:right;flex:1.4"><span class="hint">Suggested selling price</span><div class="big2">${fmt(sug)}</div></div></div>`;
+  return {ing,pack,over,labor,mk,total,per,sug:+sug};
+}
+function saveCosting(){
+  const name=$('cName').value.trim(); if(!name){ toast('Name your recipe first 🍰'); return; }
+  const c=calcCosting();
+  const doc={ id:$('cId').value||null, name, yield:+$('cYield').value||1,
+    ingredients:cIngs.filter(g=>String(g.name).trim()&&(+g.unitCost>0)),
+    packaging:c.pack, overhead:c.over, labor:c.labor, markup:c.mk,
+    ingCost:+c.ing.toFixed(2), totalCost:+c.total.toFixed(2), costPerPc:+c.per.toFixed(2), price:c.sug,
+    createdAt: $('cId').value ? (state.costings.find(x=>x.id===$('cId').value)?.createdAt||Date.now()) : Date.now() };
+  saveCostingDoc(doc); clearCostingForm();
+}
+function clearCostingForm(){ $('cId').value=''; $('cName').value=''; $('cYield').value=1; $('cPack').value=0; $('cOver').value=0; $('cLabor').value=0; $('cMarkup').value=30; cIngs=[{name:'',qty:'',unit:'g',unitCost:''}]; renderCIng(); calcCosting(); }
+function editCosting(id){
+  const c=state.costings.find(x=>x.id===id); if(!c) return;
+  $('cId').value=c.id; $('cName').value=c.name; $('cYield').value=c.yield;
+  $('cPack').value=c.packaging; $('cOver').value=c.overhead; $('cLabor').value=c.labor; $('cMarkup').value=c.markup;
+  cIngs=c.ingredients.map(g=>({...g})); renderCIng(); calcCosting();
+  window.scrollTo({top:0,behavior:'smooth'}); toast('Loaded recipe for editing ✨');
+}
+function renderCostList(){
+  const el=$('costList');
+  if(!state.costings.length){ el.innerHTML=`<div class="empty"><div class="bowwrap">${BOW(110)}</div>No recipes yet — compute your first food cost above! 👩‍🍳</div>`; return; }
+  el.innerHTML=state.costings.map(c=>`<div class="recipe-card">
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
+      <div><b style="font-size:14px">🍰 ${esc(c.name)}</b><div class="hint">yields ${c.yield} pc(s) · ${c.ingredients.length} ingredients</div></div>
+      <div style="text-align:right"><div class="hint">cost/pc ${fmt(c.costPerPc)}</div><b class="pink-txt" style="font-size:16px">${fmt(c.price)}</b> <span class="hint">@ ${c.markup}% markup</span></div>
+    </div>
+    <div style="margin-top:8px"><button class="btn btn-ghost btn-sm" onclick="editCosting('${c.id}')">✏️ Edit</button>
+    <button class="icobtn" style="float:right" onclick="deleteCosting('${c.id}')">🗑</button></div>
+  </div>`).join('');
+}
+
+/* ==================== ORDERS + CALENDAR ==================== */
+let calCursor=(()=>{const d=new Date();d.setDate(1);return d;})();
+let calSel=todayISO();
+let ordFilter='Active';
+let oItems=[{name:'',qty:1,price:''}];
+function calShift(n){ if(n===0){ calCursor=new Date(); calCursor.setDate(1); calSel=todayISO(); } else { calCursor.setMonth(calCursor.getMonth()+n); } renderCalendar(); }
+function ordTotal(o){ return (o.items||[]).reduce((s,i)=>s+(+i.qty||0)*(+i.price||0),0); }
+function renderCalendar(){
+  if(!$('calGrid')) return;
+  const y=calCursor.getFullYear(), m=calCursor.getMonth();
+  const mkey=`${y}-${String(m+1).padStart(2,'0')}`;
+  $('calLabel').textContent=calCursor.toLocaleDateString('en-PH',{month:'long',year:'numeric'});
+  let h=['SUN','MON','TUE','WED','THU','FRI','SAT'].map(d=>`<div class="dow">${d}</div>`).join('');
+  const cells=[]; const first=new Date(y,m,1).getDay(); const days=new Date(y,m+1,0).getDate(); const pdays=new Date(y,m,0).getDate();
+  for(let i=first-1;i>=0;i--) cells.push({dim:1,num:pdays-i});
+  for(let d=1;d<=days;d++){ const dt=`${mkey}-${String(d).padStart(2,'0')}`; cells.push({num:d,date:dt,today:dt===todayISO(),sel:dt===calSel}); }
+  const rem=(7-cells.length%7)%7; for(let i=1;i<=rem;i++) cells.push({dim:1,num:i});
+  h+=cells.map(c=>{
+    if(c.dim) return `<div class="day dim"><span class="num">${c.num}</span></div>`;
+    const ods=(state.orders||[]).filter(o=>o.date===c.date);
+    const dots=ods.slice(0,3).map(o=>`<div class="od ${o.status==='Done'?'done':o.status==='Cancelled'?'cancel':''}">${esc(o.customer)} · ${fmt(ordTotal(o))}</div>`).join('')+(ods.length>3?`<div class="hint" style="font-size:9px;margin-top:2px">+${ods.length-3} more</div>`:'');
+    return `<div class="day ${c.today?'today':''} ${c.sel?'sel':''}" onclick="calPick('${c.date}')"><span class="num">${c.num}</span><div class="dots">${dots}</div></div>`;
+  }).join('');
+  $('calGrid').innerHTML=h;
+  const act=o=>o.status!=='Cancelled';
+  $('ordMonthChip').textContent=(state.orders||[]).filter(o=>(o.date||'').startsWith(mkey)&&act(o)).length+' order(s) this month';
+  const dayTot=(state.orders||[]).filter(o=>o.date===calSel&&act(o)).reduce((s,o)=>s+ordTotal(o),0);
+  const monTot=(state.orders||[]).filter(o=>(o.date||'').startsWith(mkey)&&act(o)).reduce((s,o)=>s+ordTotal(o),0);
+  $('calDayLabel').textContent='Sales · '+(calSel||'—');
+  $('calDayTotal').textContent=fmt(dayTot);
+  $('calMonthTotal').textContent=fmt(monTot);
+  renderOrdersTable();
+}
+function calPick(d){ calSel=d; if($('oDate')) $('oDate').value=d; renderCalendar(); }
+function addOrderRow(){ oItems.push({name:'',qty:1,price:''}); renderOrderItems(); orderTotals(); }
+function renderOrderItems(){
+  let h=`<thead><tr><th>Product</th><th style="width:58px">Qty</th><th style="width:96px">Price ₱</th><th style="width:90px">Amount</th><th style="width:28px"></th></tr></thead><tbody>`;
+  oItems.forEach((it,i)=>{
+    h+=`<tr><td><input class="inp" list="prodList" value="${esc(it.name)}" placeholder="e.g. Classic Chocolate Cake 8&quot;" oninput="oItems[${i}].name=this.value" onchange="ordSuggest(${i})"></td>
+    <td><input class="inp num" type="number" min="0" step="any" value="${it.qty}" oninput="oItems[${i}].qty=+this.value;ordRow(${i})"></td>
+    <td><input class="inp num" type="number" min="0" step="0.01" value="${it.price}" oninput="oItems[${i}].price=+this.value;ordRow(${i})"></td>
+    <td class="num" id="oamt${i}">${fmt((+it.qty||0)*(+it.price||0))}</td>
+    <td><button class="icobtn" onclick="oItems.splice(${i},1);renderOrderItems();orderTotals()">✕</button></td></tr>`;
+  });
+  const names=[...new Set([...state.costings.map(c=>c.name), ...state.expenses.flatMap(e=>e.items||[]).map(i=>i.name)])].filter(Boolean);
+  h+=`</tbody><datalist id="prodList">${names.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>`;
+  $('oItems').innerHTML=h;
+}
+function ordSuggest(i){
+  const q=String(oItems[i].name).trim().toLowerCase(); if(!q) return;
+  const c=state.costings.find(x=>x.name&&x.name.toLowerCase()===q);
+  if(c){ oItems[i].price=c.price; renderOrderItems(); orderTotals(); toast('Price auto-filled mula sa recipe ✨'); }
+}
+function ordRow(i){ const el=$('oamt'+i); if(el) el.textContent=fmt((+oItems[i].qty||0)*(+oItems[i].price||0)); orderTotals(); }
+function orderTotals(){ const t=oItems.reduce((s,i)=>s+(+i.qty||0)*(+i.price||0),0); $('oTotalBox').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><span class="hint">Order total</span><div class="big2">${fmt(t)}</div></div>`; }
+function saveOrder(){
+  const items=oItems.filter(i=>String(i.name).trim()&&Number(i.price)>0);
+  if(!items.length){ toast('Add at least one item'); return; }
+  if(!$('oCust').value.trim()){ toast('Lagay mo ang customer name 🎀'); return; }
+  const id=$('oId').value||null;
+  const doc={ id, date:$('oDate').value||todayISO(), customer:$('oCust').value.trim(), status:$('oStatus').value,
+    items:items.map(i=>({name:String(i.name).trim(),qty:+i.qty||1,price:+i.price})), note:$('oNote').value.trim(),
+    createdAt: id ? (state.orders.find(o=>o.id===id)?.createdAt||Date.now()) : Date.now() };
+  if(!doc.id) doc.id=FB_ON?wsRef('orders').push().key:uid();
+  state.orders=[doc,...state.orders.filter(o=>o.id!==doc.id)];
+  persistLocal(); renderAll();
+  if(FB_ON) wsRef('orders/'+doc.id).set(doc).catch(()=>{});
+  toast('Order saved 🎂'); clearOrderForm();
+}
+function clearOrderForm(){ $('oId').value=''; $('oCust').value=''; $('oNote').value=''; $('oStatus').value='New'; $('oDate').value=calSel||todayISO(); oItems=[{name:'',qty:1,price:''}]; $('ordFormTitle').textContent='New Order'; renderOrderItems(); orderTotals(); }
+function editOrder(id){
+  const o=state.orders.find(x=>x.id===id); if(!o) return;
+  $('oId').value=o.id; $('oCust').value=o.customer; $('oNote').value=o.note||''; $('oStatus').value=o.status; $('oDate').value=o.date;
+  oItems=(o.items||[]).map(i=>({...i})); $('ordFormTitle').textContent='Edit Order';
+  renderOrderItems(); orderTotals(); window.scrollTo({top:0,behavior:'smooth'}); toast('Loaded for editing ✨');
+}
+function deleteOrder(id){
+  state.orders=state.orders.filter(o=>o.id!==id);
+  persistLocal(); renderAll();
+  if(FB_ON&&!String(id).startsWith('L')) wsRef('orders/'+id).remove().catch(()=>{});
+  toast('Deleted');
+}
+function setOrdFilter(f){ ordFilter=f; renderOrdersTable(); }
+function renderOrdersTable(){
+  const y=calCursor.getFullYear(), m=calCursor.getMonth();
+  const mkey=`${y}-${String(m+1).padStart(2,'0')}`;
+  const all=(state.orders||[]).filter(o=>(o.date||'').startsWith(mkey));
+  const counts={All:all.length, Active:all.filter(o=>!['Done','Cancelled'].includes(o.status)).length, Done:all.filter(o=>o.status==='Done').length, Cancelled:all.filter(o=>o.status==='Cancelled').length};
+  $('ordFilters').innerHTML=['All','Active','Done','Cancelled'].map(f=>`<button class="pill ${ordFilter===f?'on':''}" onclick="setOrdFilter('${f}')">${f} (${counts[f]})</button>`).join('');
+  let list=all;
+  if(ordFilter==='Active') list=all.filter(o=>!['Done','Cancelled'].includes(o.status));
+  else if(ordFilter!=='All') list=all.filter(o=>o.status===ordFilter);
+  list=[...list].sort((a,b)=>(a.date||'').localeCompare(b.date||'')||((a.createdAt||0)-(b.createdAt||0)));
+  $('ordCount').textContent=list.length+' shown';
+  let h=`<thead><tr><th>Date</th><th>Customer</th><th>Items</th><th class="num">Total</th><th>Status</th><th>Note</th><th></th></tr></thead><tbody>`;
+  if(!list.length) h+=`<tr><td colspan="7"><div class="empty"><div class="bowwrap">${BOW(110)}</div>No orders for this view — add one above! 🎂</div></td></tr>`;
+  list.forEach(o=>{
+    h+=`<tr><td style="white-space:nowrap">${o.date===calSel?'📌 ':''}${esc(o.date)}</td>
+    <td><b>${esc(o.customer)}</b></td>
+    <td>${(o.items||[]).map(i=>`${esc(i.name)} ×${i.qty}`).join('<br>')}</td>
+    <td class="num"><b>${fmt(ordTotal(o))}</b></td>
+    <td><select class="status-sel" onchange="quickStatus('${o.id}',this.value)">${['New','Baking','Ready','Done','Cancelled'].map(s=>`<option ${s===o.status?'selected':''}>${s}</option>`).join('')}</select></td>
+    <td class="hint">${esc(o.note||'')}</td>
+    <td style="white-space:nowrap"><button class="icobtn" title="Edit" onclick="editOrder('${o.id}')">✏️</button><button class="icobtn" title="Delete" onclick="deleteOrder('${o.id}')">🗑</button></td></tr>`;
+  });
+  $('ordTable').innerHTML=h+'</tbody>';
+}
+function quickStatus(id,st){
+  const o=state.orders.find(x=>x.id===id); if(!o) return;
+  o.status=st; persistLocal();
+  if(FB_ON&&!String(id).startsWith('L')) wsRef('orders/'+id).set(o).catch(()=>{});
+  renderCalendar(); toast('Status → '+st);
+}
+
+/* ==================== HOME & INSIGHTS ==================== */
+function monthExp(){ const m=todayISO().slice(0,7); return state.expenses.filter(e=>(e.date||'').startsWith(m)); }
+function renderHome(){
+  const me=monthExp();
+  const spent=me.reduce((s,e)=>s+e.items.reduce((a,i)=>a+(+i.qty||0)*(+i.price||0),0)+(+e.fare||0)+(+e.other||0),0);
+  const all=state.expenses.reduce((s,e)=>s+e.items.reduce((a,i)=>a+(+i.qty||0)*(+i.price||0),0)+(+e.fare||0)+(+e.other||0),0);
+  const costTotal=state.costings.reduce((s,c)=>s+(+c.totalCost||0),0);
+  const mk=todayISO().slice(0,7);
+  const sales=state.orders.filter(o=>(o.date||'').startsWith(mk)&&o.status!=='Cancelled').reduce((s,o)=>s+ordTotal(o),0);
+  $('homeStats').innerHTML=`
+    <div class="stat"><span>Spent this month</span><b>${fmt(spent)}</b></div>
+    <div class="stat gold"><span>All-time purchases</span><b>${fmt(all)}</b></div>
+    <div class="stat"><span>Receipts scanned</span><b>${state.expenses.length}</b></div>
+    <div class="stat gold"><span>Recipes costed</span><b>${state.costings.length}</b></div>
+    <div class="stat"><span>Recipe cost value</span><b>${fmt(costTotal)}</b></div>
+    <div class="stat gold"><span>Order sales (mo)</span><b style="color:var(--pink-600)">${fmt(sales)}</b></div>`;
+  const recent=state.expenses.slice(0,5);
+  $('homeRecent').innerHTML = recent.length? recent.map(e=>{
+    const tot=e.items.reduce((a,i)=>a+(+i.qty||0)*(+i.price||0),0)+(+e.fare||0)+(+e.other||0);
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 2px;border-bottom:1px solid #FFF0F6;gap:8px">
+      <div style="min-width:0"><b style="font-size:13px">${esc(e.shop)}</b><div class="hint">${e.date} · ${e.items.length} item(s) · ${esc(e.category)}</div></div>
+      <div style="display:flex;align-items:center;gap:6px;flex:none"><b>${fmt(tot)}</b>
+      <button class="icobtn" onclick="openEditor('${e.id}')">✏️</button></div></div>`;
+  }).join('') : `<div class="empty">Wala pang receipts — scan your first one! 📸</div>`;
+  // expiring soon
+  const ex=expiringSoon();
+  $('homeExpiry').innerHTML = ex.length? ex.map(x=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:7px 2px;border-bottom:1px solid #FFF0F6;font-size:12.5px;align-items:center">
+      <div style="min-width:0"><b>${esc(x.name)}</b><div class="hint">${esc(x.shop)} · ${x.qty} pc(s)</div></div>
+      <span class="${x.diff<0?'exp-bad':'exp-warn'}" style="white-space:nowrap;font-size:11px">${x.diff<0?'EXPIRED':x.diff===0?'EXP today':'in '+x.diff+'d'}</span></div>`).join('')
+    : `<div class="empty">Walang malapit ma-expire 🎉</div>`;
+  // upcoming orders
+  const up=state.orders.filter(o=>o.date>=todayISO()&&!['Done','Cancelled'].includes(o.status))
+    .sort((a,b)=>(a.date||'').localeCompare(b.date||'')).slice(0,5);
+  $('homeOrders').innerHTML = up.length? up.map(o=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:7px 2px;border-bottom:1px solid #FFF0F6;font-size:12.5px;align-items:center">
+      <div style="min-width:0"><b>${esc(o.customer)}</b><div class="hint">${o.date} · ${(o.items||[]).map(i=>esc(i.name)).join(', ')}</div></div>
+      <b style="white-space:nowrap">${fmt(ordTotal(o))}</b></div>`).join('')
+    : `<div class="empty">No upcoming orders — add one sa Calendar! 🗓️</div>`;
+}
+function renderInsights(){
+  const me=monthExp();
+  const sum=me.reduce((s,e)=>s+e.items.reduce((a,i)=>a+(+i.qty||0)*(+i.price||0),0)+(+e.fare||0)+(+e.other||0),0);
+  const fare=me.reduce((s,e)=>s+(+e.fare||0),0);
+  $('insStats').innerHTML=`
+    <div class="stat"><span>This month</span><b>${fmt(sum)}</b></div>
+    <div class="stat gold"><span>Receipts</span><b>${me.length}</b></div>
+    <div class="stat"><span>Avg / receipt</span><b>${fmt(me.length?sum/me.length:0)}</b></div>
+    <div class="stat gold"><span>Fare spent</span><b>${fmt(fare)}</b></div>`;
+  const byCat={}; me.forEach(e=>{ const c=e.category||'Other'; const t=e.items.reduce((a,i)=>a+(+i.qty||0)*(+i.price||0),0)+(+e.fare||0)+(+e.other||0); byCat[c]=(byCat[c]||0)+t; });
+  const ent=Object.entries(byCat).sort((a,b)=>b[1]-a[1]); const max=ent.length?ent[0][1]:1;
+  $('insBars').innerHTML = ent.length? ent.map(([k,v])=>`<div class="bar-row"><div class="nm">${k}</div><div class="bar-track"><i data-w="${Math.round(v/max*100)}"></i></div><div class="amt">${fmt(v)}</div></div>`).join('') : '<p class="hint">No data for this month yet.</p>';
+  requestAnimationFrame(()=>document.querySelectorAll('#insBars i').forEach(i=>i.style.width=i.dataset.w+'%'));
+  const byShop={}; me.forEach(e=>{ const t=e.items.reduce((a,i)=>a+(+i.qty||0)*(+i.price||0),0); byShop[e.shop]=(byShop[e.shop]||0)+t; });
+  const shops=Object.entries(byShop).sort((a,b)=>b[1]-a[1]).slice(0,6); const smax=shops.length?shops[0][1]:1;
+  $('insShops').innerHTML = shops.length? shops.map(([k,v])=>`<div class="bar-row"><div class="nm">${esc(k)}</div><div class="bar-track"><i data-w="${Math.round(v/smax*100)}" style="background:linear-gradient(90deg,var(--gold-300),var(--gold-500))"></i></div><div class="amt">${fmt(v)}</div></div>`).join('') : '<p class="hint">—</p>';
+  requestAnimationFrame(()=>document.querySelectorAll('#insShops i').forEach(i=>i.style.width=i.dataset.w+'%'));
+}
+
+/* ==================== INIT ==================== */
+loadLocal();
+renderCIng(); calcCosting();
+renderOrderItems(); orderTotals();
+renderAll();
+attachSync();
+</script>
+</body>
+</html>
